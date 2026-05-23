@@ -183,11 +183,7 @@ export function initGui(config, update, { deckgl, webgl2, globe } = {}) {
     gui.addBinding(config, 'rotate').on('change', update);
   }
 
-  gui.addButton({ title: 'Demo' }).on('click', () => location.href = 'https://weatherlayers.com/demo.html');
-  gui.addButton({ title: 'Integrations' }).on('click', () => location.href = 'https://weatherlayers.com/integrations.html');
-  gui.addButton({ title: 'Docs' }).on('click', () => location.href = 'https://docs.weatherlayers.com/');
-
-  const raster = gui.addFolder({ title: 'Raster layer', expanded: true });
+  const raster = gui.addFolder({ title: 'Raster layer', expanded: false });
   raster.addBinding(config.raster, 'enabled').on('change', update);
   // raster.addBinding(config.raster, 'palette').on('change', update);
   raster.addBinding(config.raster, 'borderEnabled').on('change', update);
@@ -198,7 +194,7 @@ export function initGui(config, update, { deckgl, webgl2, globe } = {}) {
   raster.addBinding(config.raster, 'gridColor').on('change', update);
   raster.addBinding(config.raster, 'opacity', { min: 0, max: 1, step: 0.01 }).on('change', update);
 
-  const contour = gui.addFolder({ title: 'Contour layer', expanded: true });
+  const contour = gui.addFolder({ title: 'Contour layer', expanded: false });
   contour.addBinding(config.contour, 'enabled').on('change', update);
   contour.addBinding(config.contour, 'interval', { min: 0, max: 1000, step: 1 }).on('change', update);
   contour.addBinding(config.contour, 'majorInterval', { min: 0, max: 1000, step: 1 }).on('change', update);
@@ -207,7 +203,7 @@ export function initGui(config, update, { deckgl, webgl2, globe } = {}) {
   contour.addBinding(config.contour, 'palette').on('change', update);
   contour.addBinding(config.contour, 'opacity', { min: 0, max: 1, step: 0.01 }).on('change', update);
 
-  const highLow = gui.addFolder({ title: 'HighLow layer', expanded: true });
+  const highLow = gui.addFolder({ title: 'HighLow layer', expanded: false });
   highLow.addBinding(config.highLow, 'enabled').on('change', update);
   highLow.addBinding(config.highLow, 'radius', { min: 0, max: 5 * 1000, step: 1 }).on('change', updateLast);
   highLow.addBinding(config.highLow, 'textSize', { min: 1, max: 20, step: 1 }).on('change', update);
@@ -218,7 +214,7 @@ export function initGui(config, update, { deckgl, webgl2, globe } = {}) {
   highLow.addBinding(config.highLow, 'opacity', { min: 0, max: 1, step: 0.01 }).on('change', update);
 
   if (deckgl) {
-    const grid = gui.addFolder({ title: 'Grid layer', expanded: true });
+    const grid = gui.addFolder({ title: 'Grid layer', expanded: false });
     grid.addBinding(config.grid, 'enabled').on('change', update);
     grid.addBinding(config.grid, 'style', { options: getOptions(Object.values(WeatherLayers.GridStyle)) }).on('change', update);
     grid.addBinding(config.grid, 'density', { min: -2, max: 2, step: 1 }).on('change', update);
@@ -233,7 +229,7 @@ export function initGui(config, update, { deckgl, webgl2, globe } = {}) {
   }
 
   if (webgl2) {
-    const particle = gui.addFolder({ title: 'Particle layer', expanded: true });
+    const particle = gui.addFolder({ title: 'Particle layer', expanded: false });
     particle.addBinding(config.particle, 'enabled').on('change', update);
     particle.addBinding(config.particle, 'numParticles', { min: 0, max: 100000, step: 1 }).on('change', updateLast);
     particle.addBinding(config.particle, 'maxAge', { min: 0, max: 255, step: 1 }).on('change', updateLast);
@@ -247,7 +243,7 @@ export function initGui(config, update, { deckgl, webgl2, globe } = {}) {
     particle.addButton({ title: 'Clear' }).on('click', () => deckgl.layerManager.getLayers({ layerIds: ['particle-line'] })[0]?.clear());
   }
 
-  const tooltip = gui.addFolder({ title: 'Tooltip control', expanded: true });
+  const tooltip = gui.addFolder({ title: 'Tooltip control', expanded: false });
   tooltip.addBinding(config.tooltip, 'directionType', { options: getOptions(Object.values(WeatherLayers.DirectionType)) }).on('change', update);
   tooltip.addBinding(config.tooltip, 'directionFormat', { options: getOptions(Object.values(WeatherLayers.DirectionFormat)) }).on('change', update);
   tooltip.addBinding(config.tooltip, 'followCursorOffset', { min: 0, max: 50, step: 1 }).on('change', update);
