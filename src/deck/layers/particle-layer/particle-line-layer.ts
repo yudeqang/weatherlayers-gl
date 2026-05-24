@@ -89,6 +89,7 @@ export class ParticleLineLayer<ExtraPropsT extends {} = {}> extends LineLayer<un
 
   declare state: LineLayer['state'] & {
     initialized?: boolean;
+    currentNumParticles?: number;
     numInstances?: number;
     numAgedInstances?: number;
     sourcePositions?: Buffer;
@@ -239,18 +240,19 @@ export class ParticleLineLayer<ExtraPropsT extends {} = {}> extends LineLayer<un
     }
 
     const {numParticles, maxAge} = ensureDefaultProps(this.props, defaultProps);
+    const currentNumParticles = Math.max(4, Math.floor(numParticles / 4) * 4);
 
     // sourcePositions/targetPositions buffer layout:
     // |          age0             |          age1             |          age2             |...|          age(N-1)         |
     // |pos0,pos1,pos2,...,pos(N-1)|pos0,pos1,pos2,...,pos(N-1)|pos0,pos1,pos2,...,pos(N-1)|...|pos0,pos1,pos2,...,pos(N-1)|
-    const numInstances = numParticles * maxAge;
-    const numAgedInstances = numParticles * (maxAge - 1);
+    const numInstances = currentNumParticles * maxAge;
+    const numAgedInstances = currentNumParticles * (maxAge - 1);
     const sourcePositions = device.createBuffer(new Float32Array(numInstances * 3));
     const targetPositions = device.createBuffer(new Float32Array(numInstances * 3));
     const sourceColors = device.createBuffer(new Float32Array(numInstances * 4));
     const targetColors = device.createBuffer(new Float32Array(numInstances * 4));
     const opacities = device.createBuffer(new Float32Array(new Array(numInstances).fill(undefined).map((_, i) => {
-      const particleAge = Math.floor(i / numParticles);
+      const particleAge = Math.floor(i / currentNumParticles);
       return 1 - particleAge / maxAge;
     })));
 
@@ -258,7 +260,7 @@ export class ParticleLineLayer<ExtraPropsT extends {} = {}> extends LineLayer<un
     const transform = new BufferTransform(device, {
       vs: updateVs,
       modules: [bitmapModule, rasterModule, paletteModule, particleModule],
-      vertexCount: numParticles,
+      vertexCount: currentNumParticles,
 
       attributes: {
         [SOURCE_POSITION]: sourcePositions,
@@ -278,6 +280,7 @@ export class ParticleLineLayer<ExtraPropsT extends {} = {}> extends LineLayer<un
 
     this.setState({
       initialized: true,
+      currentNumParticles,
       numInstances,
       numAgedInstances,
       sourcePositions,
@@ -298,9 +301,9 @@ export class ParticleLineLayer<ExtraPropsT extends {} = {}> extends LineLayer<un
     }
 
     const {device, viewport, timeline} = this.context;
-    const {imageTexture, imageTexture2, imageSmoothing, imageInterpolation, imageWeight, imageType, imageUnscale, imageMinValue, imageMaxValue, bounds, color, numParticles, maxAge, speedFactor} = ensureDefaultProps(this.props, defaultProps);
-    const {paletteTexture, paletteBounds, numAgedInstances, sourcePositions, targetPositions, sourceColors, targetColors, transform, previousViewportZoom, previousTime} = this.state;
-    if (!imageTexture || typeof numAgedInstances !== 'number' || !sourcePositions || !targetPositions || !sourceColors || !targetColors || !transform) {
+    const {imageTexture, imageTexture2, imageSmoothing, imageInterpolation, imageWeight, imageType, imageUnscale, imageMinValue, imageMaxValue, bounds, color, maxAge, speedFactor} = ensureDefaultProps(this.props, defaultProps);
+    const {paletteTexture, paletteBounds, currentNumParticles, numAgedInstances, sourcePositions, targetPositions, sourceColors, targetColors, transform, previousViewportZoom, previousTime} = this.state;
+    if (!imageTexture || typeof currentNumParticles !== 'number' || typeof numAgedInstances !== 'number' || !sourcePositions || !targetPositions || !sourceColors || !targetColors || !transform) {
       return;
     }
 
@@ -335,7 +338,7 @@ export class ParticleLineLayer<ExtraPropsT extends {} = {}> extends LineLayer<un
       } satisfies PaletteModuleProps,
       [particleModule.name]: {
         viewportGlobe, viewportGlobeCenter, viewportGlobeRadius, viewportBounds, viewportZoomChangeFactor,
-        numParticles, maxAge, speedFactor: currentSpeedFactor,
+        numParticles: currentNumParticles, maxAge, speedFactor: currentSpeedFactor,
         time, seed: Math.random(),
       } satisfies ParticleModuleProps,
     });
@@ -355,7 +358,7 @@ export class ParticleLineLayer<ExtraPropsT extends {} = {}> extends LineLayer<un
       sourceBuffer: sourcePositions,
       sourceOffset: 0,
       destinationBuffer: targetPositions,
-      destinationOffset: numParticles * 4 * 3,
+      destinationOffset: currentNumParticles * 4 * 3,
       size: numAgedInstances * 4 * 3,
     });
 
@@ -366,7 +369,7 @@ export class ParticleLineLayer<ExtraPropsT extends {} = {}> extends LineLayer<un
       sourceBuffer: sourceColors,
       sourceOffset: 0,
       destinationBuffer: targetColors,
-      destinationOffset: numParticles * 4 * 4,
+      destinationOffset: currentNumParticles * 4 * 4,
       size: numAgedInstances * 4 * 4,
     });
 
@@ -442,6 +445,7 @@ export class ParticleLineLayer<ExtraPropsT extends {} = {}> extends LineLayer<un
 
     this.setState({
       initialized: false,
+      currentNumParticles: undefined,
       sourcePositions: undefined,
       targetPositions: undefined,
       sourceColors: undefined,
