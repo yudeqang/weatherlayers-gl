@@ -1,4 +1,7 @@
-import FPSStats from 'react-fps-stats';
+import FPSStatsModule from 'react-fps-stats';
+
+// react-fps-stats is a CJS/Babel package; Vite 8 no longer auto-unwraps __esModule interop
+const FPSStats = (FPSStatsModule as any).default ?? FPSStatsModule;
 
 import Deck from './Deck.tsx';
 import Mapbox from './Mapbox.tsx';
