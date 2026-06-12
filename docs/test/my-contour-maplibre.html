@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>labelContour MapLibre Test</title>
+  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://unpkg.com/deck.gl@9.3.2/dist/dist.dev.js"></script>
+  <script src="../../dist/weatherlayers-deck.umd.min.js?v=label-contour-thresholds-18"></script>
+  <style>
+    html,
+    body,
+    #map {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: #071013;
+      color: #d9f7ff;
+      overflow: hidden;
+    }
+
+    .panel {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      width: 330px;
+      padding: 12px 14px;
+      border: 1px solid rgba(177, 239, 255, 0.28);
+      border-radius: 8px;
+      background: rgba(7, 16, 19, 0.82);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(8px);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .panel h1 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 4px 12px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(177, 239, 255, 0.18);
+    }
+
+    .control {
+      display: grid;
+      grid-template-columns: 120px 1fr 42px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .control.checkbox {
+      grid-template-columns: 120px 1fr;
+    }
+
+    .control input[type="range"] {
+      width: 100%;
+      accent-color: #b9f6ff;
+    }
+
+    .control input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 4px 6px;
+      border: 1px solid rgba(177, 239, 255, 0.34);
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #f7fdff;
+      font: inherit;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .control input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #b9f6ff;
+    }
+
+    .key {
+      color: rgba(217, 247, 255, 0.72);
+    }
+
+    .value {
+      color: #f7fdff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .legend {
+      position: absolute;
+      right: 16px;
+      bottom: 18px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(7, 16, 19, 0.78);
+      color: #eaffff;
+      font-size: 12px;
+    }
+
+    .ramp {
+      width: 180px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #315bb7, #2da7b8, #3cb653, #f0ba4c, #da5a42);
+    }
+
+    .error {
+      color: #ffb4a8;
+    }
+
+    .note {
+      margin-top: 8px;
+      color: rgba(217, 247, 255, 0.62);
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <div class="panel">
+    <h1>labelContour test</h1>
+    <div id="status" class="grid">
+      <div class="key">status</div>
+      <div class="value">loading...</div>
+    </div>
+    <div class="controls">
+      <label class="control">
+        <span class="key">fieldSmoothing</span>
+        <input id="fieldSmoothing" type="range" min="0" max="12" step="1" value="6">
+        <span id="fieldSmoothingValue" class="value">6</span>
+      </label>
+      <label class="control">
+        <span class="key">smoothIterations</span>
+        <input id="smoothIterations" type="range" min="0" max="5" step="1" value="3">
+        <span id="smoothIterationsValue" class="value">3</span>
+      </label>
+      <label class="control">
+        <span class="key">labelStep</span>
+        <input id="labelStep" type="number" min="1" step="1" value="45">
+        <span id="labelStepValue" class="value">45</span>
+      </label>
+      <label class="control checkbox">
+        <span class="key">labels</span>
+        <input id="labelVisible" type="checkbox" checked>
+      </label>
+      <div class="note">Each contour path gets one label; shorter paths appear later, and zoom 9 shows all labels by default.</div>
+    </div>
+  </div>
+  <div class="legend">
+    <span>300</span>
+    <div class="ramp"></div>
+    <span>600</span>
+  </div>
+
+  <script>
+    const DATA_URL = './data.byte.webp?v=label-contour-thresholds-18';
+    const DATA_BOUNDS = [-180, -90, 180, 90];
+    const IMAGE_UNSCALE = [300, 600];
+    const INTERVAL = 26;
+    const MAJOR_INTERVAL = 52;
+    const LABEL_ZOOM_THRESHOLDS = [[2, 9], [5, 7], [10, 5]];
+    const state = {
+      fieldSmoothing: 6,
+      smoothIterations: 3,
+      labelStep: 45,
+      labelVisible: true,
+    };
+
+    const palette = [
+      [300, [49, 91, 183]],
+      [375, [45, 167, 184]],
+      [450, [60, 182, 83]],
+      [525, [240, 186, 76]],
+      [600, [218, 90, 66]],
+    ];
+
+    const status = document.getElementById('status');
+    const controls = {
+      fieldSmoothing: document.getElementById('fieldSmoothing'),
+      smoothIterations: document.getElementById('smoothIterations'),
+      labelStep: document.getElementById('labelStep'),
+      labelVisible: document.getElementById('labelVisible'),
+    };
+    const controlValues = {
+      fieldSmoothing: document.getElementById('fieldSmoothingValue'),
+      smoothIterations: document.getElementById('smoothIterationsValue'),
+      labelStep: document.getElementById('labelStepValue'),
+    };
+
+    let overlay;
+    let loadedImage;
+
+    function setStatus(rows, error) {
+      status.className = error ? 'grid error' : 'grid';
+      status.innerHTML = rows.map(([key, value]) => `
+        <div class="key">${key}</div>
+        <div class="value">${value}</div>
+      `).join('');
+    }
+
+    function syncControls() {
+      state.fieldSmoothing = Number(controls.fieldSmoothing.value);
+      state.smoothIterations = Number(controls.smoothIterations.value);
+      state.labelStep = Math.max(Number(controls.labelStep.value) || 1, 1);
+      controls.labelStep.value = state.labelStep;
+      state.labelVisible = controls.labelVisible.checked;
+
+      controlValues.fieldSmoothing.textContent = state.fieldSmoothing;
+      controlValues.smoothIterations.textContent = state.smoothIterations;
+      controlValues.labelStep.textContent = state.labelStep;
+    }
+
+    function createLayers(image) {
+      return [
+        new WeatherLayers.RasterLayer({
+          id: 'raster',
+          image,
+          bounds: DATA_BOUNDS,
+          maxZoom: null,
+          imageType: WeatherLayers.ImageType.SCALAR,
+          imageUnscale: IMAGE_UNSCALE,
+          imageInterpolation: WeatherLayers.ImageInterpolation.CUBIC,
+          imageSmoothing: state.fieldSmoothing,
+          palette,
+          opacity: 0.58,
+          pickable: true,
+        }),
+        new WeatherLayers.LabelContourLayer({
+          id: 'labelContour',
+          image,
+          bounds: DATA_BOUNDS,
+          imageType: WeatherLayers.ImageType.SCALAR,
+          imageUnscale: IMAGE_UNSCALE,
+          imageInterpolation: WeatherLayers.ImageInterpolation.CUBIC,
+          imageSmoothing: 0,
+          fieldSmoothing: state.fieldSmoothing,
+          interval: INTERVAL,
+          majorInterval: MAJOR_INTERVAL,
+          smooth: state.smoothIterations > 0,
+          smoothIterations: state.smoothIterations,
+          width: 1.8,
+          color: [185, 246, 255, 230],
+          labelVisible: state.labelVisible,
+          labelStep: state.labelStep,
+          labelZoomThresholds: LABEL_ZOOM_THRESHOLDS,
+          labelBackground: true,
+          labelBackgroundColor: [210, 255, 255, 235],
+          labelBackgroundPadding: [4, 2, 4, 2],
+          textSize: 13,
+          textColor: [16, 58, 67, 255],
+          textOutlineWidth: 0,
+          opacity: 1,
+        }),
+      ];
+    }
+
+    function updateLayers() {
+      syncControls();
+      if (overlay && loadedImage) {
+        overlay.setProps({layers: createLayers(loadedImage)});
+      }
+    }
+
+    Object.values(controls).forEach(control => {
+      control.addEventListener('input', updateLayers);
+      control.addEventListener('change', updateLayers);
+    });
+    syncControls();
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const map = new maplibregl.Map({
+          container: 'map',
+          style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+          center: [-78, 39],
+          zoom: 3.2,
+          pitch: 0,
+          bearing: 0,
+          attributionControl: true,
+        });
+        map.addControl(new maplibregl.NavigationControl({visualizePitch: true}), 'top-right');
+        await new Promise(resolve => map.once('load', resolve));
+
+        loadedImage = await WeatherLayers.loadTextureData(DATA_URL);
+        setStatus([
+          ['status', 'loaded'],
+          ['image', `${loadedImage.width} x ${loadedImage.height}`],
+          ['imageUnscale', `[${IMAGE_UNSCALE.join(', ')}]`],
+          ['interval', INTERVAL],
+          ['majorInterval', MAJOR_INTERVAL],
+          ['labelThresholds', JSON.stringify(LABEL_ZOOM_THRESHOLDS)],
+          ['bounds', `[${DATA_BOUNDS.join(', ')}]`],
+        ]);
+
+        overlay = new deck.MapboxOverlay({
+          interleaved: false,
+          layers: createLayers(loadedImage),
+        });
+
+        map.addControl(overlay);
+      } catch (error) {
+        console.error(error);
+        setStatus([
+          ['status', 'error'],
+          ['message', error?.message || String(error)],
+        ], true);
+      }
+    });
+  </script>
+</body>
+
+</html>
