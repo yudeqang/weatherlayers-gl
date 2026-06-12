@@ -8,6 +8,9 @@ description: Build or troubleshoot WeatherLayers GL visualizations, including Ra
 Use this skill for `weatherlayers-gl` weather map work: data loading, deck.gl layers,
 MapLibre/Mapbox overlays, controls, legends, labels, animations, and local demos.
 
+For exact layer/control props, data format rules, compatibility notes, and the full
+`LabelContourLayer` API, read `references/weatherlayers-gl-reference.md`.
+
 ## Core Setup
 
 ```js
