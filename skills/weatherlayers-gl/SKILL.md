@@ -13,9 +13,10 @@ For exact layer/control props, data format rules, compatibility notes, and the f
 
 ## Install This Skill
 
-From this repository, copy `skills/weatherlayers-gl` to
-`%USERPROFILE%\.codex\skills\weatherlayers-gl`, then start a new Codex
-thread/session so the skill metadata is reloaded.
+Install this Codex/Agents skill from the GitHub path
+`https://github.com/yudeqang/weatherlayers-gl/tree/main/skills/weatherlayers-gl`.
+The skill installer places it under `$CODEX_HOME/skills/weatherlayers-gl` by
+default. Restart Codex after installation so the skill metadata is reloaded.
 
 ## Core Setup
 

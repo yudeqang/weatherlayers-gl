@@ -48,38 +48,33 @@ import * as WeatherLayers from "me-layers";
 This repository includes built `dist` files, so GitHub installation works without
 running Rollup in the consuming project.
 
-For local development from a sibling checkout:
+For local development, replace the GitHub URL with the path to your checkout:
 
 ```sh
-npm install ../weatherlayers-gl
-```
-
-or with an absolute Windows path:
-
-```sh
-npm install C:\Users\10171\Documents\Codex\2026-06-10\who-are-you-3\weatherlayers-gl
+npm install /path/to/weatherlayers-gl
 ```
 
 ## Install The Codex Skill
 
-This repo includes a Codex skill at:
+This repo includes a Codex/Agents skill at:
 
 ```text
 skills/weatherlayers-gl
 ```
 
-Install or update it on Windows PowerShell:
+Install it from the GitHub skill path:
 
-```powershell
-$src = "C:\Users\10171\Documents\Codex\2026-06-10\who-are-you-3\weatherlayers-gl\skills\weatherlayers-gl"
-$dst = "$env:USERPROFILE\.codex\skills\weatherlayers-gl"
-New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
-Copy-Item -Recurse -Force $src $dst
+```text
+https://github.com/yudeqang/weatherlayers-gl/tree/main/skills/weatherlayers-gl
 ```
 
-Start a new Codex thread/session after copying so the skill metadata is reloaded.
-The skill includes `references/weatherlayers-gl-reference.md` for the fuller
-layer and control reference.
+In Codex, ask the agent to install the skill from that GitHub path. The skill
+installer installs it into `$CODEX_HOME/skills/weatherlayers-gl` by default
+(`~/.codex/skills/weatherlayers-gl` when `CODEX_HOME` is not set).
+
+Restart Codex after installation so the skill metadata is reloaded. The skill
+includes `references/weatherlayers-gl-reference.md` for the fuller layer and
+control reference.
 
 ## labelContour
 
