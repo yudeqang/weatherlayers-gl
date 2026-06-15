@@ -11,6 +11,12 @@ MapLibre/Mapbox overlays, controls, legends, labels, animations, and local demos
 For exact layer/control props, data format rules, compatibility notes, and the full
 `LabelContourLayer` API, read `references/weatherlayers-gl-reference.md`.
 
+## Install This Skill
+
+From this repository, copy `skills/weatherlayers-gl` to
+`%USERPROFILE%\.codex\skills\weatherlayers-gl`, then start a new Codex
+thread/session so the skill metadata is reloaded.
+
 ## Core Setup
 
 ```js

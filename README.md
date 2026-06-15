@@ -8,6 +8,79 @@ Package and source code is dual-licensed, the choice of license is MPL-2.0 or ou
 * [Demo](https://demo.weatherlayers.com/)
 * [Docs](https://docs.weatherlayers.com/)
 
+## Install This Fork
+
+Install this fork directly from GitHub:
+
+```sh
+npm install github:yudeqang/weatherlayers-gl
+```
+
+To pin an exact build, install a commit:
+
+```sh
+npm install github:yudeqang/weatherlayers-gl#<commit-sha>
+```
+
+The package name is still `weatherlayers-gl`, so imports stay the same:
+
+```js
+import * as WeatherLayers from "weatherlayers-gl";
+```
+
+If you want to use the dependency name `me-layers` in your own app, add an npm
+alias in your app's `package.json`:
+
+```json
+{
+  "dependencies": {
+    "me-layers": "github:yudeqang/weatherlayers-gl#main"
+  }
+}
+```
+
+Then run `npm install` and import from the alias:
+
+```js
+import * as WeatherLayers from "me-layers";
+```
+
+This repository includes built `dist` files, so GitHub installation works without
+running Rollup in the consuming project.
+
+For local development from a sibling checkout:
+
+```sh
+npm install ../weatherlayers-gl
+```
+
+or with an absolute Windows path:
+
+```sh
+npm install C:\Users\10171\Documents\Codex\2026-06-10\who-are-you-3\weatherlayers-gl
+```
+
+## Install The Codex Skill
+
+This repo includes a Codex skill at:
+
+```text
+skills/weatherlayers-gl
+```
+
+Install or update it on Windows PowerShell:
+
+```powershell
+$src = "C:\Users\10171\Documents\Codex\2026-06-10\who-are-you-3\weatherlayers-gl\skills\weatherlayers-gl"
+$dst = "$env:USERPROFILE\.codex\skills\weatherlayers-gl"
+New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
+Copy-Item -Recurse -Force $src $dst
+```
+
+Start a new Codex thread/session after copying so the skill metadata is reloaded.
+The skill includes `references/weatherlayers-gl-reference.md` for the fuller
+layer and control reference.
+
 ## labelContour
 
 This fork adds `LabelContourLayer` for Windy-style contour lines with value labels.
