@@ -11,13 +11,6 @@ MapLibre/Mapbox overlays, controls, legends, labels, animations, and local demos
 For exact layer/control props, data format rules, compatibility notes, and the full
 `LabelContourLayer` API, read `references/weatherlayers-gl-reference.md`.
 
-## Install This Skill
-
-Install this Codex/Agents skill from the GitHub path
-`https://github.com/yudeqang/weatherlayers-gl/tree/main/skills/weatherlayers-gl`.
-The skill installer places it under `$CODEX_HOME/skills/weatherlayers-gl` by
-default. Restart Codex after installation so the skill metadata is reloaded.
-
 ## Core Setup
 
 ```js

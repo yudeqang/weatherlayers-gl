@@ -54,27 +54,31 @@ For local development, replace the GitHub URL with the path to your checkout:
 npm install /path/to/weatherlayers-gl
 ```
 
-## Install The Codex Skill
+## Install The Agent Skill
 
-This repo includes a Codex/Agents skill at:
+This repo includes a portable agent skill at:
 
 ```text
 skills/weatherlayers-gl
 ```
 
-Install it from the GitHub skill path:
+Use this GitHub folder URL with any agent or IDE that supports installing skills
+from a repository path:
 
 ```text
 https://github.com/yudeqang/weatherlayers-gl/tree/main/skills/weatherlayers-gl
 ```
 
-In Codex, ask the agent to install the skill from that GitHub path. The skill
-installer installs it into `$CODEX_HOME/skills/weatherlayers-gl` by default
-(`~/.codex/skills/weatherlayers-gl` when `CODEX_HOME` is not set).
+If your agent does not support direct GitHub skill import, download or copy the
+entire `skills/weatherlayers-gl` directory into that agent's skill directory.
+Keep the folder structure intact, including:
 
-Restart Codex after installation so the skill metadata is reloaded. The skill
-includes `references/weatherlayers-gl-reference.md` for the fuller layer and
-control reference.
+```text
+skills/weatherlayers-gl/SKILL.md
+skills/weatherlayers-gl/references/weatherlayers-gl-reference.md
+```
+
+After installation, reload or restart the agent so it can discover the new skill.
 
 ## labelContour
 
